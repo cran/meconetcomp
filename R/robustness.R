@@ -30,7 +30,7 @@ robustness <- R6::R6Class(classname = "robustness",
 		#' 	   \item{\strong{"Eigen"}}{natural connectivity <doi: 10.1007/s11704-016-6108-z>.
 		#' 	   	 The natural connectivity can be regarded as an average eigenvalue that changes strictly monotonically with the addition or deletion of edges. It is defined:
 		#' 	   	     \deqn{\bar{\lambda} = \ln(\frac{1}{N} \sum_{i=1}^{N} e^{\lambda~i~})}
-		#' 	   	 where \eqn{\lambda~i~} is the \eqn{i}th eigenvalue of the graph adjacency matrix. The lager the value of \eqn{\bar{\lambda}} is, the more robust the network is.
+		#' 	   	 where \eqn{\lambda~i~} is the \eqn{i}th eigenvalue of the graph adjacency matrix. The larger the value of \eqn{\bar{\lambda}} is, the more robust the network is.
 		#' 	   	 }
 		#' 	   \item{\strong{"Pcr"}}{critical removal fraction of vertices (edges) for the disintegration of networks 
 		#' 	   	 <doi: 10.1007/s11704-016-6108-z> <doi: 10.1103/PhysRevE.72.056130>.
@@ -109,9 +109,14 @@ robustness <- R6::R6Class(classname = "robustness",
 							tmp_delete_node_names <- replicate(run, sample(total_hub_names, size = delete_number), simplify = FALSE)
 							delete_node_names[[paste0("node_hub_number_", delete_number)]] <- tmp_delete_node_names
 						}
-						if(any(c("node_degree_high", "node_degree_low") %in% remove_strategy)){
+						if(any(c("node_rand", "node_degree_high", "node_degree_low") %in% remove_strategy)){
 							total_nodes_number <- length(igraph::V(network))
 							delete_number <- round(total_nodes_number * i)
+						}
+						if("node_rand" %in% remove_strategy){
+							total_node_names <- igraph::V(network)$name
+							tmp_delete_node_names <- replicate(run, sample(total_node_names, size = delete_number), simplify = FALSE)
+							delete_node_names[[paste0("node_rand_number_", delete_number)]] <- tmp_delete_node_names
 						}
 						if("node_degree_high" %in% remove_strategy){
 							node_names_order <- sort(igraph::degree(network), decreasing = TRUE) %>% names
