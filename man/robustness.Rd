@@ -51,7 +51,7 @@ tmp$plot(linewidth = 1)
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{network_list}}{a list with multiple networks; all the networks should be \code{trans_network} object 
-created from \code{\link{trans_network}} class of microeco package.}
+created from \code{trans_network} class of \code{microeco} package.}
 
 \item{\code{remove_strategy}}{default "edge_rand"; 
 \describe{
@@ -59,7 +59,7 @@ created from \code{\link{trans_network}} class of microeco package.}
   \item{\strong{"edge_strong"}}{edges are removed in decreasing order of weight.}
      \item{\strong{"edge_weak"}}{edges are removed in increasing order of weight.}
      \item{\strong{"node_rand"}}{nodes are removed randomly.}
-     \item{\strong{"node_hub"}}{node hubs are removed. The hubs include network hubs and module hubs.}
+     \item{\strong{"node_hub"}}{node hubs are randomly removed. The hubs include network hubs and module hubs.}
      \item{\strong{"node_degree_high"}}{nodes are removed in decreasing order of degree.}
      \item{\strong{"node_degree_low"}}{nodes are removed in increasing order of degree.}
 }}
@@ -88,12 +88,13 @@ created from \code{\link{trans_network}} class of microeco package.}
           }
 }}
 
-\item{\code{run}}{default 10. Replication number applied for the sampling method.}
+\item{\code{run}}{default 10. Replication number of simulation for the sampling method; Only available when \code{remove_strategy} = "edge_rand", "node_rand" or "node_hub".}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{res_table}, stored in the object.
+\code{res_table} and \code{res_summary}, stored in the object. The \code{res_table} is the original simulation result.
+   The Mean and SD in \code{res_summary} come from the \code{res_table}.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
