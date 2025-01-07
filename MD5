@@ -1,12 +1,12 @@
-5e9fc32524c6598532d7f50b0c31fcfc *DESCRIPTION
+d3a9ed1cdbfbf7974f55b0ecc1f239e9 *DESCRIPTION
 4e8d7d172eff5034aabf0636245dd61d *NAMESPACE
 f70e2660b0a6bce2ed3d36a59c1fc63d *R/cal_module.R
 7a64c46eaf2f7ce2361585c1e72548a3 *R/cal_network_attr.R
-82c5bbadad164c9c6847e1123da47008 *R/cohesionclass.R
+9b9254319c0bd165073c446735b36e05 *R/cohesionclass.R
 8e4c8128242076d2771963070cfd1f2c *R/data.R
 5475fca83748718dfa95c2505cd7ca42 *R/edge_comp.R
-72782ba7a8e954032813c0c47aacc034 *R/edge_node_distance.R
-a72c225dbfc421416d7b79c6c351c3fe *R/edge_tax_comp.R
+6982cac69a594035ff59f1081b80822e *R/edge_node_distance.R
+e8160f0c8a5b3dbb0451cbb492f46116 *R/edge_tax_comp.R
 92e552b0bbf9acbd3efb348c7e00257e *R/get_edge_table.R
 7eddf96f325552a299b93429f9f90eb2 *R/get_node_table.R
 aa370b520d3d2a2efe8785afb500f376 *R/help.R
@@ -26,8 +26,8 @@ b6901825a9d359d284f524eb1c60e07b *inst/CITATION
 83ad02c9ebbd169ef03e52c826c98ec7 *man/cal_network_attr.Rd
 9b72f599e8a509a5a99216d43d311693 *man/cohesionclass.Rd
 9e4bf66359eafe6ff320cfd68028180d *man/edge_comp.Rd
-a9b343531d45dcab5d22f572eaa3b463 *man/edge_node_distance.Rd
-d58682f3a8c1a27e475c14d7404f2bef *man/edge_tax_comp.Rd
+6870116ec24f9c8c8fb2295b7cfa135e *man/edge_node_distance.Rd
+b273f3220f747a1388b95c3f2225ef88 *man/edge_tax_comp.Rd
 6e29e233054e30e94661efe8ea5dd4df *man/get_edge_table.Rd
 4817e3a1edb0be080cd2a8e894852d59 *man/get_node_table.Rd
 71945f2f9f5233fa31859bcff11fffef *man/meconetcomp.Rd
