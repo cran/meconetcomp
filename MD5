@@ -1,8 +1,8 @@
-f12425298cd00a118791733f9fccce9b *DESCRIPTION
+4f0e48fa838e0a18ec1fe67c6494ab7e *DESCRIPTION
 4e8d7d172eff5034aabf0636245dd61d *NAMESPACE
 f70e2660b0a6bce2ed3d36a59c1fc63d *R/cal_module.R
 7a64c46eaf2f7ce2361585c1e72548a3 *R/cal_network_attr.R
-9b9254319c0bd165073c446735b36e05 *R/cohesionclass.R
+dd111b2780c1c652ed3136986130c6bf *R/cohesionclass.R
 8e4c8128242076d2771963070cfd1f2c *R/data.R
 5475fca83748718dfa95c2505cd7ca42 *R/edge_comp.R
 6982cac69a594035ff59f1081b80822e *R/edge_node_distance.R
@@ -13,7 +13,7 @@ aa370b520d3d2a2efe8785afb500f376 *R/help.R
 4869b6ce7e943f7ad1861ce934c6ccf2 *R/import.R
 6f383e3df98f5b074ab4f7f697cc5c9c *R/node_comp.R
 e0a86dea28f23b4f70b6f3fc84173070 *R/robustness.R
-c3191aa1dfac6e91c882983934b8cd7a *R/subnet_property.R
+7147efb6846e5264885687ccd5b7ec5b *R/subnet_property.R
 28e7614dd8a8790c46d64fea3cbf9e19 *R/subset_network.R
 feacb498c02fc06988017017f1ab616c *R/utility.R
 68f5574e39eb18f00f287e5d18581eba *R/vulnerability.R
@@ -24,7 +24,7 @@ fb505e2efb7ba21521333efce01936db *data/stool_met.RData
 b6901825a9d359d284f524eb1c60e07b *inst/CITATION
 820535a1b6b2bade62c3ed9cd420c8b4 *man/cal_module.Rd
 83ad02c9ebbd169ef03e52c826c98ec7 *man/cal_network_attr.Rd
-9b72f599e8a509a5a99216d43d311693 *man/cohesionclass.Rd
+042522d80a47725f8597557732436567 *man/cohesionclass.Rd
 9e4bf66359eafe6ff320cfd68028180d *man/edge_comp.Rd
 6870116ec24f9c8c8fb2295b7cfa135e *man/edge_node_distance.Rd
 b273f3220f747a1388b95c3f2225ef88 *man/edge_tax_comp.Rd
@@ -37,6 +37,6 @@ b6ef67fdaa425d5ebe1666a500408191 *man/soil_amp.Rd
 c699b40438fae828aeee6af680459216 *man/soil_amp_network.Rd
 f1cb40c058cc6e68fc686e74b1e25bc9 *man/soil_measure_diversity.Rd
 3718e9ba11c08438bf32c2b7f74d5490 *man/stool_met.Rd
-5d3e7cb734102af03e86455eba75c334 *man/subnet_property.Rd
+01c0ec6e438cc913691420caf5d65b61 *man/subnet_property.Rd
 e44b6e9e5461f5a34a2ad5f80249763b *man/subset_network.Rd
 87804bbd52b8509e4fa40e44236ae579 *man/vulnerability.Rd
