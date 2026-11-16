@@ -10,15 +10,21 @@ robustness <- R6::R6Class(classname = "robustness",
 		#' 	 created from \code{trans_network} class of \code{microeco} package.
 		#' @param remove_strategy default "edge_rand"; 
 		#'   \describe{
-		#' 	   \item{\strong{"edge_rand"}}{edges are randomly removed.}
-		#'     \item{\strong{"edge_strong"}}{edges are removed in decreasing order of weight.}
-		#' 	   \item{\strong{"edge_weak"}}{edges are removed in increasing order of weight.}
-		#' 	   \item{\strong{"node_rand"}}{nodes are removed randomly.}
-		#' 	   \item{\strong{"node_hub"}}{node hubs are randomly removed. The hubs include network hubs and module hubs.}
+		#' 	   \item{\strong{"edge_rand"}}{The edges are randomly removed.}
+		#'     \item{\strong{"edge_strong"}}{The edges are removed in decreasing order of weight.}
+		#' 	   \item{\strong{"edge_weak"}}{The edges are removed in increasing order of weight.}
+		#' 	   \item{\strong{"node_rand"}}{The nodes are removed randomly.}
+		#' 	   \item{\strong{"node_hub"}}{The node hubs are randomly removed. The hubs include network hubs and module hubs.}
+		#' 	   \item{\strong{"node_hubcon"}}{The node hubs and connectors are randomly removed, including network hubs, module hubs and connectors.}
+		#' 	   \item{\strong{"node_nethub"}}{The network hubs are randomly removed.}
+		#' 	   \item{\strong{"node_modhub"}}{The module hubs are randomly removed.}
+		#' 	   \item{\strong{"node_con"}}{The connectors are randomly removed.}
 		#' 	   \item{\strong{"node_degree_high"}}{nodes are removed in decreasing order of degree.}
 		#' 	   \item{\strong{"node_degree_low"}}{nodes are removed in increasing order of degree.}
 		#'   }
-		#' @param remove_ratio default seq(0, 1, 0.1).
+		#' @param remove_ratio default seq(0, 1, 0.1). Removed ratio of nodes or edges according to the \code{remove_strategy} option.
+		#' @param remove_number default NULL. Fixed number (e.g., 5 or c(1, 5)) instead of the ratio of \code{remove_ratio} parameter.
+		#'    When it is provided, the parameter \code{remove_ratio} will be disabled.
 		#' @param measure default "Eff"; network robustness measures. 
 		#'   \describe{
 		#' 	   \item{\strong{"Eff"}}{network efficiency. The average efficiency of the network is defined:
@@ -40,7 +46,8 @@ robustness <- R6::R6Class(classname = "robustness",
 		#' 	   	 where \eqn{\langle k \rangle} is the average nodal degree of the original network, and \eqn{\langle k^2 \rangle} is the average of square of nodal degree. 
 		#' 	   	 }
 		#'   }
-		#' @param run default 10. Replication number of simulation for the sampling method; Only available when \code{remove_strategy} = "edge_rand", "node_rand" or "node_hub".
+		#' @param run default 10. Replication number of simulation for the sampling method; 
+		#'    Only available when \code{remove_strategy} = "edge_rand", "node_rand", "node_hub", "node_hubcon", "node_nethub", "node_modhub" or "node_con".
 		#' @param delete_unlinked_nodes default FALSE; whether delete the nodes without any link when removing edges.
 		#' @return \code{res_table} and \code{res_summary}, stored in the object. The \code{res_table} is the original simulation result.
 		#'    The Mean and SD in \code{res_summary} come from the \code{res_table}.
@@ -49,42 +56,67 @@ robustness <- R6::R6Class(classname = "robustness",
 		#'   measure = c("Eff"), run = 3, remove_ratio = c(0.1, 0.5, 0.9))
 		#' 
 		initialize = function(network_list, 
-			remove_strategy = c("edge_rand", "edge_strong", "edge_weak", "node_rand", "node_hub", "node_degree_high", "node_degree_low")[1], 
+			remove_strategy = c("edge_rand", "edge_strong", "edge_weak", 
+				"node_rand", "node_hub", "node_hubcon", "node_nethub", "node_modhub", "node_con", "node_degree_high", "node_degree_low")[1], 
 			remove_ratio = seq(0, 1, 0.1), 
+			remove_number = NULL, 
 			measure = c("Eff", "Eigen", "Pcr")[1], 
-			run = 10,
+			run = 10, 
 			delete_unlinked_nodes = FALSE
 			){
 			
 			check_input(network_list)
-			if("node_hub" %in% remove_strategy){
+			if(any(c("node_hub", "node_hubcon", "node_nethub", "node_modhub", "node_con") %in% remove_strategy)){
 				private$check_node_table(network_list)
 			}
 			res <- list()
 			
+			if(is.null(remove_number)){
+				remove_seq <- remove_ratio
+			}else{
+				remove_seq <- remove_number
+			}
+			
 			for(j in seq_along(network_list)){
 				message("Network: ", names(network_list)[j], " ...")
 				network <- network_list[[j]]$res_network
-
-				for(i in remove_ratio){
-					message("Remove ratio: ", i, " ...")
+				
+				for(i in remove_seq){
+					if(is.null(remove_number)){
+						message("Remove ratio: ", i, " ...")
+					}else{
+						message("Remove number: ", i, " ...")
+					}
 					network_del <- list()
 					
 					if(any(grepl("^edge_", remove_strategy))){
 						delete_edge_sequence <- list()
 						total_edges_number <- length(igraph::E(network))
-						delete_number <- round(total_edges_number * i)
+						if(is.null(remove_number)){
+							delete_number <- round(total_edges_number * i)
+							delete_ratio <- i
+						}else{
+							delete_ratio <- i/total_edges_number
+							if(delete_ratio >= 1){
+								warning("Input remove_number ", remove_number, " >= the total edges number ", total_edges_number, " for the network: ", names(network_list)[j], 
+									"! The result will come from all the network!")
+								delete_ratio <- 0
+								delete_number <- 0
+							}else{
+								delete_number <- i
+							}
+						}
 						if("edge_rand" %in% remove_strategy){
 							tmp_delete_edge_sequence <- replicate(run, sample(1:total_edges_number, size = delete_number), simplify = FALSE)
-							delete_edge_sequence[[paste0("edge_rand_number_", delete_number)]] <- tmp_delete_edge_sequence
+							delete_edge_sequence[[paste0("edge_rand_number_", delete_number, "_ratio_", delete_ratio)]] <- tmp_delete_edge_sequence
 						}
 						if("edge_strong" %in% remove_strategy){
 							tmp_delete_edge_sequence <- order(igraph::E(network)$weight, decreasing = TRUE)[1:delete_number] %>% list
-							delete_edge_sequence[[paste0("edge_strong_number_", delete_number)]] <- tmp_delete_edge_sequence
+							delete_edge_sequence[[paste0("edge_strong_number_", delete_number, "_ratio_", delete_ratio)]] <- tmp_delete_edge_sequence
 						}
 						if("edge_weak" %in% remove_strategy){
 							tmp_delete_edge_sequence <- order(igraph::E(network)$weight, decreasing = FALSE)[1:delete_number] %>% list
-							delete_edge_sequence[[paste0("edge_weak_number_", delete_number)]] <- tmp_delete_edge_sequence
+							delete_edge_sequence[[paste0("edge_weak_number_", delete_number, "_ratio_", delete_ratio)]] <- tmp_delete_edge_sequence
 						}
 						tmp_network_del_list <- lapply(delete_edge_sequence, function(y){
 							lapply(y, function(x){
@@ -107,29 +139,178 @@ robustness <- R6::R6Class(classname = "robustness",
 						if("node_hub" %in% remove_strategy){
 							tmp_obj <- clone(network_list[[j]])
 							total_hub_names <- tmp_obj$res_node_table %>% .[grepl("hub", .$taxa_roles), ] %>% rownames
-							if(length(total_hub_names) == 0){
-								warning("No network or module hub is found for the network: ", names(network_list)[j], "! The node_hub results come from the full network!")
+							total_hub_number <- length(total_hub_names)
+							if(total_hub_number == 0){
+								warning("No network or module hub is found for the network: ", names(network_list)[j], "! The node_hub results will come from total network!")
+								delete_number <- 0
+								delete_ratio <- 0
+							}else{
+								if(is.null(remove_number)){
+									delete_number <- round(total_hub_number * i)
+									delete_ratio <- i
+								}else{
+									delete_ratio <- i/total_hub_number
+									if(delete_ratio > 1){
+										warning("Input remove_number ", remove_number, " > the hub nodes number ", total_hub_number, " for the network: ", 
+											names(network_list)[j], "! The result will come from all the network!")
+										delete_ratio <- 0
+										delete_number <- 0
+									}else{
+										delete_number <- i
+									}
+								}
 							}
-							delete_number <- round(length(total_hub_names) * i)
 							tmp_delete_node_names <- replicate(run, sample(total_hub_names, size = delete_number), simplify = FALSE)
-							delete_node_names[[paste0("node_hub_number_", delete_number)]] <- tmp_delete_node_names
+							delete_node_names[[paste0("node_hub_number_", delete_number, "_ratio_", delete_ratio)]] <- tmp_delete_node_names
+						}
+						if("node_hubcon" %in% remove_strategy){
+							tmp_obj <- clone(network_list[[j]])
+							total_hubcon_names <- tmp_obj$res_node_table %>% .[grepl("hub|Connectors", .$taxa_roles), ] %>% rownames
+							total_hubcon_number <- length(total_hubcon_names)
+							if(total_hubcon_number == 0){
+								warning("No network hub, module hub or connectors is found for the network: ", 
+									names(network_list)[j], "! The node_hubcon results will come from total network!")
+								delete_number <- 0
+								delete_ratio <- 0
+							}else{
+								if(is.null(remove_number)){
+									delete_number <- round(total_hubcon_number * i)
+									delete_ratio <- i
+								}else{
+									delete_ratio <- i/total_hubcon_number
+									if(delete_ratio > 1){
+										warning("Input remove_number ", remove_number, " > the hub and connector nodes number ", total_hubcon_number, " for the network: ", 
+											names(network_list)[j], "! The result will come from all the network!")
+										delete_ratio <- 0
+										delete_number <- 0
+									}else{
+										delete_number <- i
+									}
+								}
+							}
+							
+							tmp_delete_node_names <- replicate(run, sample(total_hubcon_names, size = delete_number), simplify = FALSE)
+							delete_node_names[[paste0("node_hubcon_number_", delete_number, "_ratio_", delete_ratio)]] <- tmp_delete_node_names
+						}
+						if("node_nethub" %in% remove_strategy){
+							tmp_obj <- clone(network_list[[j]])
+							total_nethub_names <- tmp_obj$res_node_table %>% .[!is.na(.$taxa_roles), ] %>% .[.$taxa_roles == "Network hubs", ] %>% rownames
+							total_nethub_number <- length(total_nethub_names)
+							if(total_nethub_number == 0){
+								warning("No network hub is found for the network: ", 
+									names(network_list)[j], "! The node_nethub results will come from total network!")
+								delete_number <- 0
+								delete_ratio <- 0
+							}else{
+								if(is.null(remove_number)){
+									delete_number <- round(total_nethub_number * i)
+									delete_ratio <- i
+								}else{
+									delete_ratio <- i/total_nethub_number
+									if(delete_ratio > 1){
+										warning("Input remove_number ", remove_number, " > the network hub nodes number ", total_nethub_number, " for the network: ", 
+											names(network_list)[j], "! The result will come from all the network!")
+										delete_ratio <- 0
+										delete_number <- 0
+									}else{
+										delete_number <- i
+									}
+								}
+							}							
+							
+							tmp_delete_node_names <- replicate(run, sample(total_nethub_names, size = delete_number), simplify = FALSE)
+							delete_node_names[[paste0("node_nethub_number_", delete_number, "_ratio_", delete_ratio)]] <- tmp_delete_node_names
+						}
+						if("node_modhub" %in% remove_strategy){
+							tmp_obj <- clone(network_list[[j]])
+							total_modhub_names <- tmp_obj$res_node_table %>% .[!is.na(.$taxa_roles), ] %>% .[.$taxa_roles == "Module hubs", ] %>% rownames
+
+							total_modhub_number <- length(total_modhub_names)
+							if(total_modhub_number == 0){
+								warning("No module hub is found for the network: ", 
+									names(network_list)[j], "! The node_modhub results will come from total network!")
+								delete_number <- 0
+								delete_ratio <- 0
+							}else{
+								if(is.null(remove_number)){
+									delete_number <- round(total_modhub_number * i)
+									delete_ratio <- i
+								}else{
+									delete_ratio <- i/total_modhub_number
+									if(delete_ratio > 1){
+										warning("Input remove_number ", remove_number, " > the module hub nodes number ", total_modhub_number, " for the network: ", 
+											names(network_list)[j], "! The result will come from all the network!")
+										delete_ratio <- 0
+										delete_number <- 0
+									}else{
+										delete_number <- i
+									}
+								}
+							}
+							
+							tmp_delete_node_names <- replicate(run, sample(total_modhub_names, size = delete_number), simplify = FALSE)
+							delete_node_names[[paste0("node_modhub_number_", delete_number, "_ratio_", delete_ratio)]] <- tmp_delete_node_names
+						}
+						if("node_con" %in% remove_strategy){
+							tmp_obj <- clone(network_list[[j]])
+							total_con_names <- tmp_obj$res_node_table %>% .[!is.na(.$taxa_roles), ] %>% .[.$taxa_roles == "Connectors", ] %>% rownames
+
+							total_con_number <- length(total_con_names)
+							if(total_con_number == 0){
+								warning("No connectors is found for the network: ", 
+									names(network_list)[j], "! The node_con results will come from total network!")
+								delete_number <- 0
+								delete_ratio <- 0
+							}else{
+								if(is.null(remove_number)){
+									delete_number <- round(total_con_number * i)
+									delete_ratio <- i
+								}else{
+									delete_ratio <- i/total_con_number
+									if(delete_ratio > 1){
+										warning("Input remove_number ", remove_number, " > the connector nodes number ", total_con_number, " for the network: ", 
+											names(network_list)[j], "! The result will come from all the network!")
+										delete_ratio <- 0
+										delete_number <- 0
+									}else{
+										delete_number <- i
+									}
+								}
+							}							
+
+							tmp_delete_node_names <- replicate(run, sample(total_con_names, size = delete_number), simplify = FALSE)
+							delete_node_names[[paste0("node_con_number_", delete_number, "_ratio_", delete_ratio)]] <- tmp_delete_node_names
 						}
 						if(any(c("node_rand", "node_degree_high", "node_degree_low") %in% remove_strategy)){
 							total_nodes_number <- length(igraph::V(network))
-							delete_number <- round(total_nodes_number * i)
+							
+							if(is.null(remove_number)){
+								delete_number <- round(total_nodes_number * i)
+								delete_ratio <- i
+							}else{
+								delete_ratio <- i/total_nodes_number
+								if(delete_ratio >= 1){
+									warning("Input remove_number ", remove_number, " >= the total nodes number ", total_nodes_number, " for the network: ", 
+										names(network_list)[j], "! The result will come from all the network!")
+									delete_ratio <- 0
+									delete_number <- 0
+								}else{
+									delete_number <- i
+								}
+							}
 						}
 						if("node_rand" %in% remove_strategy){
 							total_node_names <- igraph::V(network)$name
 							tmp_delete_node_names <- replicate(run, sample(total_node_names, size = delete_number), simplify = FALSE)
-							delete_node_names[[paste0("node_rand_number_", delete_number)]] <- tmp_delete_node_names
+							delete_node_names[[paste0("node_rand_number_", delete_number, "_ratio_", delete_ratio)]] <- tmp_delete_node_names
 						}
 						if("node_degree_high" %in% remove_strategy){
 							node_names_order <- sort(igraph::degree(network), decreasing = TRUE) %>% names
-							delete_node_names[[paste0("node_degree_high_number_", delete_number)]] <- node_names_order[1:delete_number] %>% list
+							delete_node_names[[paste0("node_degree_high_number_", delete_number, "_ratio_", delete_ratio)]] <- node_names_order[1:delete_number] %>% list
 						}
 						if("node_degree_low" %in% remove_strategy){
 							node_names_order <- sort(igraph::degree(network), decreasing = FALSE) %>% names
-							delete_node_names[[paste0("node_degree_low_number_", delete_number)]] <- node_names_order[1:delete_number] %>% list
+							delete_node_names[[paste0("node_degree_low_number_", delete_number, "_ratio_", delete_ratio)]] <- node_names_order[1:delete_number] %>% list
 						}
 						tmp_network_del_list <- lapply(delete_node_names, function(y){
 							lapply(y, function(x){
@@ -165,7 +346,6 @@ robustness <- R6::R6Class(classname = "robustness",
 						tmp_table
 					})
 					tmp_res_table %<>% do.call(rbind, .)
-					tmp_res_table$remove_ratio <- i
 					tmp_res_table$Network <- names(network_list)[j]
 					res[[length(res) + 1]] <- tmp_res_table
 				}
@@ -174,7 +354,11 @@ robustness <- R6::R6Class(classname = "robustness",
 			res <- reshape2::melt(res, measure.vars = 1:run, variable.name = "Run")
 			res %<>% .[!is.na(.$value), ]
 			res %<>%  tidyr::separate_wider_delim(., cols = "remove_strategy", delim = "_number_", names = c("remove_strategy", "remove_number"))
+			res %<>%  tidyr::separate_wider_delim(., cols = "remove_number", delim = "_ratio_", names = c("remove_number", "remove_ratio"))
 			res %<>% .[, c("Network", "remove_strategy", "remove_ratio", "remove_number", "measure", "Run", "value")] %>% as.data.frame(check.names = FALSE)
+			res[, "Run"] %<>% as.character
+			res[, "remove_ratio"] %<>% as.numeric
+			res[, "remove_number"] %<>% as.numeric
 			res[, "Network"] %<>% factor(., levels = names(network_list))
 			res[, "remove_strategy"] %<>% factor(., levels = remove_strategy)
 			res[, "measure"] %<>% factor(., levels = measure)
@@ -187,6 +371,7 @@ robustness <- R6::R6Class(classname = "robustness",
 			self$res_summary <- res_summary
 			message("Original result is stored in the object$res_table!")
 			message("Summary result (Mean and SD) is stored in the object$res_summary!")
+			self$param_remove_number <- remove_number
 		},
 		#' @description
 		#' Plot the simulation results.
@@ -198,7 +383,7 @@ robustness <- R6::R6Class(classname = "robustness",
 		#' @param show_errorbar default TRUE; whether show the errorbar by using the SD result.
 		#' @param errorbar_position default position_dodge(0); Position adjustment, either as a string (such as "identity"), 
 		#' 	 or the result of a call to a position adjustment function.
-		#' @param errorbar_size default 1; errorbar size.
+		#' @param errorbar_size default 1; errorbar line size.
 		#' @param errorbar_width default 0.1; errorbar width.
 		#' @param add_fitting default FALSE; whether add fitted smooth line. FALSE denotes add line segment among points.
 		#' @param ... parameters pass to ggplot2::geom_line (when add_fitting = FALSE) or ggplot2::geom_smooth (when add_fitting = TRUE).
@@ -221,13 +406,18 @@ robustness <- R6::R6Class(classname = "robustness",
 			){
 			res_summary <- self$res_summary
 			
-			p <- ggplot(res_summary, aes(x = remove_ratio, y = Mean, color = Network)) +
-				scale_color_manual(values = color_values)
+			if(is.null(self$param_remove_number)){
+				p <- ggplot(res_summary, aes(x = remove_ratio, y = Mean, color = Network))
+			}else{
+				p <- ggplot(res_summary, aes(x = remove_number, y = Mean, color = Network))
+			}
+			
+			p <- p + scale_color_manual(values = color_values)
 			if(show_point){
 				p <- p + geom_point(alpha = point_alpha, size = point_size)
 			}
 			if(show_errorbar){
-				p <- p + geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), linewidth = errorbar_width, position = errorbar_position, size = errorbar_size)
+				p <- p + geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), width = errorbar_width, position = errorbar_position, linewidth = errorbar_size)
 			}
 			if(add_fitting == T){
 				p <- p + geom_smooth(se = FALSE, ...)

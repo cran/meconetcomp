@@ -1,4 +1,4 @@
-4f0e48fa838e0a18ec1fe67c6494ab7e *DESCRIPTION
+e1ed6b87199f52848cdea0856be59e5f *DESCRIPTION
 4e8d7d172eff5034aabf0636245dd61d *NAMESPACE
 f70e2660b0a6bce2ed3d36a59c1fc63d *R/cal_module.R
 7a64c46eaf2f7ce2361585c1e72548a3 *R/cal_network_attr.R
@@ -12,11 +12,12 @@ ef46f1193a30f33472188368e3707cfc *R/edge_tax_comp.R
 aa370b520d3d2a2efe8785afb500f376 *R/help.R
 4869b6ce7e943f7ad1861ce934c6ccf2 *R/import.R
 6f383e3df98f5b074ab4f7f697cc5c9c *R/node_comp.R
-e0a86dea28f23b4f70b6f3fc84173070 *R/robustness.R
+0898e2e39a370358346bd336af22c0f7 *R/robustness.R
 7147efb6846e5264885687ccd5b7ec5b *R/subnet_property.R
 28e7614dd8a8790c46d64fea3cbf9e19 *R/subset_network.R
 feacb498c02fc06988017017f1ab616c *R/utility.R
 68f5574e39eb18f00f287e5d18581eba *R/vulnerability.R
+8b0fd46df28102c6aef82e4b83f0cd49 *R/zzz.R
 ed06a8cd70ff8f898a9821098e676e18 *data/soil_amp.RData
 49de9914d2f87b049f77a88b9c3a68d2 *data/soil_amp_network.RData
 21085a6bd873258dfcd05bb2fa68a43f *data/soil_measure_diversity.RData
@@ -32,7 +33,7 @@ b273f3220f747a1388b95c3f2225ef88 *man/edge_tax_comp.Rd
 4817e3a1edb0be080cd2a8e894852d59 *man/get_node_table.Rd
 71945f2f9f5233fa31859bcff11fffef *man/meconetcomp.Rd
 0fc17725433ba723ae4d18f21cca65d9 *man/node_comp.Rd
-ced0d4185f0d68d518927f52c4545e2a *man/robustness.Rd
+676e5911ac5aad092cf12bcb6341fce1 *man/robustness.Rd
 b6ef67fdaa425d5ebe1666a500408191 *man/soil_amp.Rd
 c699b40438fae828aeee6af680459216 *man/soil_amp_network.Rd
 f1cb40c058cc6e68fc686e74b1e25bc9 *man/soil_measure_diversity.Rd
